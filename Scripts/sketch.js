@@ -16,9 +16,10 @@ const infoTextFont = 'Arial'
 const wheelItemCount = 5;
 const wheelScrollSpeed = 0.9;
 const wheelScrollSensitivity = 70;
-const wheelTextSize = 64;
-const wheelTextDistance = 90;
-const wheelTextColor = 50;
+const wheelTextSizeMin = 40;
+const wheelTextSizeMax = 75;
+const wheelTextDistance = 100;
+const wheelTextColor = 30;
 const wheelTextFont = 'Arial'
 
 const beautifulWords = [
@@ -27,8 +28,8 @@ const beautifulWords = [
     'Happy', 'Beautiful'
 ]
 
-var acceleration = 0.0;
-var scrollValue = 0.0;
+let acceleration = 0.0;
+let scrollValue = 0.0;
 
 function preload() {
     partlyCloudyImage = loadImage('Images/partly_cloudy.png');
@@ -36,6 +37,7 @@ function preload() {
 
 function setup() {
     createCanvas(width, height);
+    frameRate(30);
 }
 
 function draw() {
@@ -46,14 +48,6 @@ function draw() {
     drawDate();
     drawWeather();
     drawWheel();
-
-    // textSize(22);
-    // textAlign(CENTER, CENTER);
-    // fill(255, 0, 0, 100);
-    // text(scrollValue.toString(), width / 2, 15)
-    // stroke(255, 0, 0, 50);
-    // line(width / 2, 0, width / 2, height);
-    // line(0, height / 2, width, height / 2);
 }
 
 function updateVars() {
@@ -137,7 +131,6 @@ function drawWheel() {
     graphics.background(0, 0);
     graphics.textFont(wheelTextFont);
     graphics.textAlign(CENTER, BOTTOM);
-    graphics.textSize(wheelTextSize);
 
     for (let i = 0; i < beautifulWords.length; i++) {
         const word = beautifulWords[i];
@@ -149,8 +142,9 @@ function drawWheel() {
             dh += wheelTextDistance * beautifulWords.length;
         }
 
-        let alpha = 255 * (1 - (Math.abs(dh) + wheelTextDistance / 2) / h * 2);
-        graphics.fill(wheelTextColor, alpha);
+        let dis = (1 - (Math.abs(dh) + wheelTextDistance / 2) / h * 2)
+        graphics.fill(wheelTextColor, 255 * dis);
+        graphics.textSize(wheelTextSizeMin + (wheelTextSizeMax - wheelTextSizeMin) * dis);
         graphics.text(word, w / 2, h / 2 - dh);
     }
 
