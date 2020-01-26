@@ -151,6 +151,10 @@ function drawWheel() {
     image(graphics, x, y, w, h);
 }
 
+function touchMoved() {
+    acceleration = movedY;
+}
+
 function mouseDragged() {
     acceleration = movedY;
 }
