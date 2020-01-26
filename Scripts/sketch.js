@@ -1,5 +1,5 @@
-const width = 500;
-const height = 700;
+let width = screen.width;
+let height = screen.height;
 const backgroundColorFrom = 250;
 const backgroundColorTo = 220;
 
@@ -13,9 +13,8 @@ const infoTextColor = 50;
 const infoTextAlpha = 200;
 const infoTextFont = 'Arial'
 
-const wheelItemCount = 5;
-const wheelScrollSpeed = 0.9;
-const wheelScrollSensitivity = 70;
+const wheelScrollSpeed = 0.8;
+const wheelScrollSensitivity = 100;
 const wheelTextSizeMin = 40;
 const wheelTextSizeMax = 75;
 const wheelTextDistance = 100;
@@ -30,9 +29,12 @@ const beautifulWords = [
 
 let acceleration = 0.0;
 let scrollValue = 0.0;
+let prevY = 0;
 
 function preload() {
     partlyCloudyImage = loadImage('Images/partly_cloudy.png');
+    width = getWidth();
+    height = getHeight();
 }
 
 function setup() {
@@ -42,19 +44,45 @@ function setup() {
 
 function draw() {
     noStroke();
-    updateVars();
     drawBackground();
     drawFrame();
     drawDate();
     drawWeather();
     drawWheel();
+    updateVars();
+
+    // textSize(22);
+    // textAlign(CENTER, CENTER);
+    // fill(0, 255, 0, 100);
+    // text(startPos.toString(), width / 2, 40)
+
+    // textSize(22);
+    // textAlign(CENTER, CENTER);
+    // fill(255, 0, 0, 100);
+    // text(scrollValue.toString(), width / 2, 60)
 }
 
 function updateVars() {
-    scrollValue -= acceleration / wheelScrollSensitivity;
-    scrollValue += beautifulWords.length;
-    scrollValue %= beautifulWords.length;
-    acceleration *= wheelScrollSpeed;
+    if (mouseIsPressed) {
+        if (prevY) {
+            acceleration = mouseY - prevY;
+        }
+        prevY = mouseY;
+    } else if (touches.length > 0) {
+        if (prevY) {
+            acceleration = touches[0] - prevY;
+        }
+        prevY = touches[0];
+    } else if (acceleration < 0.01 && acceleration > -0.01) {
+        acceleration = 0;
+    }
+
+    if (acceleration !== 0) {
+        scrollValue -= acceleration / wheelScrollSensitivity;
+        scrollValue += beautifulWords.length;
+        scrollValue %= beautifulWords.length;
+        acceleration *= wheelScrollSpeed;
+    }
 }
 
 function drawBackground() {
@@ -100,7 +128,7 @@ function drawWeather() {
     graphics = createGraphics(w, h);
 
     graphics.imageMode(CENTER);
-    graphics.image(partlyCloudyImage, w * 0.6, h * 0.25, 40, 40);
+    graphics.image(partlyCloudyImage, w - 100, h * 0.25, 40, 40);
 
     graphics.background(0, 0);
     graphics.fill(infoTextColor, infoTextAlpha);
@@ -142,6 +170,12 @@ function drawWheel() {
             dh += wheelTextDistance * beautifulWords.length;
         }
 
+        if (dh > h / 2) {
+            continue;
+        } else if (dh < -h / 2 - wheelTextDistance) {
+            continue;
+        }
+
         let dis = (1 - (Math.abs(dh) + wheelTextDistance / 2) / h * 2)
         graphics.fill(wheelTextColor, 255 * dis);
         graphics.textSize(wheelTextSizeMin + (wheelTextSizeMax - wheelTextSizeMin) * dis);
@@ -149,14 +183,6 @@ function drawWheel() {
     }
 
     image(graphics, x, y, w, h);
-}
-
-function touchMoved() {
-    acceleration = movedY;
-}
-
-function mouseDragged() {
-    acceleration = movedY;
 }
 
 function setGradient(x, y, w, h, c1, c2, axis) {
@@ -201,4 +227,24 @@ function getAMPM() {
     let hours = date.getHours();
     let ampm = hours >= 12 ? 'PM' : 'AM';
     return ampm;
+}
+
+function getWidth() {
+    return Math.max(
+        document.body.scrollWidth,
+        document.documentElement.scrollWidth,
+        document.body.offsetWidth,
+        document.documentElement.offsetWidth,
+        document.documentElement.clientWidth
+    );
+}
+
+function getHeight() {
+    return Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.documentElement.clientHeight
+    );
 }
